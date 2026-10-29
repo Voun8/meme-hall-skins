@@ -6,6 +6,12 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+    inputs:
+      self_test:
+        description: 创建并关闭一次标注为自检的测试 Issue
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
   actions: read
@@ -30,6 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           WATCH_RUN_ID: ${{ github.event.workflow_run.id }}
+          MONITOR_SELF_TEST: ${{ inputs.self_test }}
         run: node scripts/monitor-checks.mjs
       - name: 显示通知范围
         if: always()

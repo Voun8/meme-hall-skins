@@ -21,6 +21,12 @@ async function main(){
  const token=process.env.GITHUB_TOKEN,repo=process.env.GITHUB_REPOSITORY
  if(!token||repo!=='kourou25/meme-hall-skins')throw Error('缺少本仓库监控权限')
  const request=async(path,method='GET',body)=>{const r=await fetch(`https://api.github.com/repos/${repo}${path}`,{method,headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(body?{'content-type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});if(!r.ok)throw Error(`GitHub 请求失败 ${r.status}：${path}`);return r.status===204?null:r.json()}
+ if(process.env.MONITOR_SELF_TEST==='true'){
+  const issue=await request('/issues','POST',{title:'[装扮自动化自检] 提醒权限验证',body:'这是自动创建并关闭的测试记录，不是实际故障。',assignees:['kourou25']})
+  try{const found=await request('/issues/'+issue.number);if(!found.assignees?.some(x=>x.login==='kourou25'))throw Error('测试提醒没有指派站长')}
+  finally{await request('/issues/'+issue.number,'PATCH',{state:'closed'})}
+  console.log(`提醒自检完成：${issue.html_url}`);return
+ }
  const issues=(await request('/issues?state=open&per_page=100')).filter(x=>!x.pull_request)
  const input=process.env.WATCH_RUN_ID
  const runs=input?[await request('/actions/runs/'+Number(input))]:(await request('/actions/workflows/check-skins.yml/runs?per_page=30')).workflow_runs
