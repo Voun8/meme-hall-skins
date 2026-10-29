@@ -1,4 +1,12 @@
 {
+  "assets/badges/v4/atlas.webp": {
+    "sha256": "057d79e3ab9081aaeacc44e766a5d83e962948e4cee4ace3a3e1fde6c7c6bcf6",
+    "bytes": 288946
+  },
+  "assets/farm/dcoin-banana-v1.webp": {
+    "sha256": "9b5d4921553f0e632181d19413a56c7d1465b528e1770894e86c470784863089",
+    "bytes": 14190
+  },
   "assets/farm-memorial/atlas.png": {
     "sha256": "cc6f30ee6e9458537f8c599f0a845caba1c9a0e0ba2bb93d772c915cb738f4aa",
     "bytes": 1753972
@@ -3418,6 +3426,10 @@
   "skin.css": {
     "sha256": "dad03b53971b7ec0a49c1ff584bb7f305e13b3743fccbe8d3f99eeb5084fc567",
     "bytes": 21183
+  },
+  "stickers/alu/think.png": {
+    "sha256": "063e3ee6ffcd19324615874b20da33a8de35ea1700f6f9506d19a3133773d7be",
+    "bytes": 2783
   },
   "stickers/heartgif/heartgif_013.webp": {
     "sha256": "8d4b734acf24dce1c67644c8641c79d41735affd7833b0d3508b0827ff1759bb",
