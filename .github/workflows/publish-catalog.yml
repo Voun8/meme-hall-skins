@@ -1,0 +1,43 @@
+name: 发布社区装扮目录
+on:
+  push:
+    branches: [main]
+    paths: ['submissions/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: community-catalog
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 验证并发布固定版本目录
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            source_sha=$(git log -1 --format=%H -- submissions)
+            if [ -z "$source_sha" ]; then
+              if [ -f catalog.json ]; then source_sha=$(node -p "require('./catalog.json').source"); else source_sha=$(git rev-parse HEAD); fi
+            fi
+            node scripts/community-catalog.mjs . "$source_sha"
+            git add catalog.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m '更新社区装扮目录'
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          echo '目录发布遇到并发更新，请重试' >&2
+          exit 1

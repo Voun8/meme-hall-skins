@@ -1,7 +1,7 @@
 name: 装扮检查异常提醒
 on:
   workflow_run:
-    workflows: [装扮投稿检查]
+    workflows: [装扮投稿检查, 社区装扮自动合并, 发布社区装扮目录]
     types: [completed]
   schedule:
     - cron: '*/15 * * * *'
@@ -14,7 +14,7 @@ on:
         default: false
 permissions:
   contents: read
-  actions: read
+  actions: write
   issues: write
   pull-requests: read
 concurrency:
@@ -41,4 +41,4 @@ jobs:
         run: node scripts/monitor-checks.mjs
       - name: 显示通知范围
         if: always()
-        run: echo '异常会写入本仓库 Issue 并指派站长；网站站长通知尚未接通。' >> "$GITHUB_STEP_SUMMARY"
+        run: echo '检查、合并或发布异常会写入本仓库 Issue，站长可在网站系统通知中查看。' >> "$GITHUB_STEP_SUMMARY"

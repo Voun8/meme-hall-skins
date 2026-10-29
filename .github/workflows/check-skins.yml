@@ -31,6 +31,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SUBMISSION_AUTHOR: ${{ github.event.pull_request.user.login }}
         shell: bash
         run: |
           set -euo pipefail
@@ -49,5 +50,5 @@ jobs:
         shell: bash
         run: |
           echo '## 装扮投稿状态' >> "$GITHUB_STEP_SUMMARY"
-          echo '此检查只验证仓库文件；主站自动同步和自动发布尚未接通。合并不等于网站已上线。' >> "$GITHUB_STEP_SUMMARY"
+          echo '投稿只接收受控配置和图片。网站显示以发布确认状态为准。' >> "$GITHUB_STEP_SUMMARY"
           echo '如检查失败，请查看上方步骤错误。' >> "$GITHUB_STEP_SUMMARY"

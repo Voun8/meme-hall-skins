@@ -2,6 +2,7 @@ import {lstat,readFile,readdir} from 'node:fs/promises'
 import {resolve,relative,sep,extname} from 'node:path'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
+import {checkChanges} from './community-catalog.mjs'
 
 const allowedExtensions=new Set(['.js','.mjs','.css','.html','.json','.svg','.png','.webp','.jpg','.jpeg','.gif','.md','.txt'])
 export async function validateSnapshot(root,changed=[],options={}){
@@ -10,6 +11,7 @@ export async function validateSnapshot(root,changed=[],options={}){
   const file=resolve(root,name),s=await lstat(file);if(!s.isFile()||s.isSymbolicLink())throw Error(`必要文件不可用：${name}`)
  }
  const problems=[]
+ if(!options.trusted){await checkChanges(root,changed,options.actor,options.base);return {changed:changed.length,passed:true}}
  for(const name of changed){
   if(!name||name.includes('\0')||name.includes('\\')||name.startsWith('/')||name.split('/').includes('..')){problems.push(`路径无效：${JSON.stringify(name)}`);continue}
   const file=resolve(root,name),rel=relative(root,file)
@@ -31,8 +33,8 @@ export async function validateSnapshot(root,changed=[],options={}){
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const root=resolve(process.argv[2]||'.'),base=process.argv[3],head=process.argv[4]||'HEAD'
  if(!base)throw Error('需要提供基线提交')
- const diff=spawnSync('git',['-C',root,'diff','--name-only','-z',base,head],{encoding:'utf8',timeout:30000})
+ const diff=spawnSync('git',['-C',root,'diff','--no-renames','--name-only','-z',base,head],{encoding:'utf8',timeout:30000})
  if(diff.status!==0)throw Error('无法读取提交差异：'+diff.stderr)
  const changed=diff.stdout.split('\0').filter(Boolean)
- console.log(JSON.stringify(await validateSnapshot(root,changed,{trusted:process.argv[5]==='--trusted'})))
+ console.log(JSON.stringify(await validateSnapshot(root,changed,{trusted:process.argv[5]==='--trusted',actor:process.env.SUBMISSION_AUTHOR,base})))
 }
