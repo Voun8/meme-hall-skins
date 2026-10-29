@@ -1,0 +1,31 @@
+/* Host reset: keep the supplied skin's dimensions, fonts, colours and artwork. */
+html .cm-text.rt-bubble.sg-host[class],html .rt-bubble.sg-host[class]{display:block;width:max-content;max-width:min(640px,100%);min-width:0;padding:0;margin:0;border:0;border-image:none;background:none;box-shadow:none;border-radius:0;color:var(--sg-ivory);overflow:visible;white-space:normal;line-height:normal;isolation:isolate}
+html .rt-bubble.sg-host[class]::before,html .rt-bubble.sg-host[class]::after{content:none!important}
+.sg-host,.sg-host *,.sg-identity,.sg-identity *,.sg-cer,.sg-cer *{box-sizing:border-box}
+.sg-host .sg-text{margin:0;text-align:left}
+.sg-host.sg-has-unicode-emoji .sg-text__type{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--sg-ivory);-webkit-text-fill-color:currentColor}
+.sg-host .sg-rich{position:relative;margin:0;font-family:var(--sg-serif);font-size:var(--sg-fs);line-height:1.75;letter-spacing:.06em;white-space:pre-line;overflow-wrap:anywhere;text-shadow:0 1px 1px #32180e}
+.sg-host .sg-rich>.rt-copy{display:contents;color:inherit;font:inherit;background:none;text-shadow:inherit}
+.sg-host .sg-rich a{color:#ffe0a1;text-decoration:underline;text-underline-offset:2px}
+.sg-host .sg-rich img{max-width:100%;height:auto}
+.sg-host .sg-rich pre{white-space:pre-wrap;overflow-wrap:anywhere}
+/* Compact the book and its ornaments while keeping the original text size. */
+.sg-host .sg-bwrap{max-width:calc(100% - 36px);margin-right:36px;margin-bottom:17px}
+.sg-host .sg-bubble{padding:8px 12px 7px}
+.sg-host .sg-reply{width:28px;height:28px;top:-13px}
+.sg-host .sg-bird{right:-35px;width:30px;height:18px}
+.sg-host .sg-ribbon--o{width:8px;height:31px;bottom:-20px;right:20px}
+.sg-host .sg-ribbon--k{width:5px;height:25px;bottom:-15px;right:29px}
+.sg-identity{display:inline-flex;align-items:center;vertical-align:middle;flex:none;overflow:visible;line-height:normal}
+.sg-identity .sg-sticker{flex:none}
+.sg-paused *,.sg-paused *::before,.sg-paused *::after{animation-play-state:paused!important;transition:none!important}
+.sg-paused .sg-fr{stroke:url(#sg-goldBright)!important}
+.sg-paused .sg-bubble{transform:none!important}
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin),
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin) *,
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin)::before,
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin)::after,
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin) *::before,
+html:is([data-bubble-motion=pause],[data-page-hidden=true]) :is(.cm-text,.rt-bubble,.ot-bubble,.pt-bubble,.bb,.guess-frame,.rt-title,.rt-badge,.u-title,.u-badge,.bz,.sg-skin) *::after{animation-play-state:paused!important}
+.sg-cer--fixed{z-index:2147483000}
+.sg-cer-host{position:fixed;inset:0;z-index:2147483000;pointer-events:none}

@@ -1,0 +1,5 @@
+import {createServer} from 'node:http'
+import {readFile,stat} from 'node:fs/promises'
+import {resolve,relative,isAbsolute,extname} from 'node:path'
+const root=resolve('public'),base=resolve('.'),port=Number(process.env.PORT)||4175
+createServer(async(req,res)=>{try{if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405).end();return}const url=new URL(req.url,'http://localhost'),name=url.pathname==='/'?'/preview.html':url.pathname,dir=name==='/preview.html'||name==='/preview.js'?base:root,file=resolve(dir,'.'+decodeURIComponent(name)),rel=relative(dir,file);if(rel.startsWith('..')||isAbsolute(rel)||(await stat(file)).isDirectory())throw Error('not found');const type={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.gif':'image/gif'}[extname(file)]||'application/octet-stream';res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-store'}).end(req.method==='HEAD'?undefined:await readFile(file))}catch{res.writeHead(404).end('Not found')}}).listen(port,'127.0.0.1',()=>console.log(`预览地址：http://127.0.0.1:${port}/`))
