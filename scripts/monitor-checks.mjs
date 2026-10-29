@@ -10,6 +10,14 @@ export function assessment(run,now=Date.now()){
  return null
 }
 export function issueTitle(id){return `[装扮自动化] 检查异常 #${Number(id)}`}
+export function pullRequestAlert(pr,now=Date.now()){
+ if(!pr||!Number.isSafeInteger(Number(pr.number))||pr.draft)return null
+ const merged=pr.state==='closed'&&pr.merged_at,at=merged?pr.merged_at:pr.updated_at
+ if(!Number.isFinite(Date.parse(at))||now-Date.parse(at)<delayedMs)return null
+ if(pr.state==='open')return {title:`[装扮自动化] 合并等待 #${pr.number}`,body:`合并请求已等待超过15分钟，尚未合并。当前自动合并尚未接通。\n\n[查看合并请求](https://github.com/kourou25/meme-hall-skins/pull/${pr.number})\n`}
+ if(merged)return {title:`[装扮自动化] 上线等待 #${pr.number}`,body:`合并请求已合并，但尚无网站自动上线的确认记录。当前仓库到主站的自动发布尚未接通。\n\n[查看合并请求](https://github.com/kourou25/meme-hall-skins/pull/${pr.number})\n`}
+ return null
+}
 export async function reconcile({run,issues,create,update,close,now=Date.now()}){
  const title=issueTitle(run.id),existing=issues.find(x=>x.title===title),reason=assessment(run,now)
  if(!reason){if(existing&&run.status==='completed'&&run.conclusion==='success')await close(existing.number);return}
@@ -27,10 +35,20 @@ async function main(){
   finally{await request('/issues/'+issue.number,'PATCH',{state:'closed'})}
   console.log(`提醒自检完成：${issue.html_url}`);return
  }
- const issues=(await request('/issues?state=open&per_page=100')).filter(x=>!x.pull_request)
+ const issues=(await request('/issues?state=all&per_page=100')).filter(x=>!x.pull_request&&x.user?.login==='github-actions[bot]')
  const input=process.env.WATCH_RUN_ID
  const runs=input?[await request('/actions/runs/'+Number(input))]:(await request('/actions/workflows/check-skins.yml/runs?per_page=30')).workflow_runs
- for(const run of runs)await reconcile({run,issues,create:async(title,body)=>{const issue=await request('/issues','POST',{title,body,assignees:['kourou25']});issues.push(issue)},update:(n,body)=>request('/issues/'+n,'PATCH',{body}),close:n=>request('/issues/'+n,'PATCH',{state:'closed'})})
+ for(const run of runs)await reconcile({run,issues:issues.filter(x=>x.state==='open'),create:async(title,body)=>{const prior=issues.find(x=>x.title===title);if(prior)return;const issue=await request('/issues','POST',{title,body,assignees:['kourou25']});issues.push(issue)},update:(n,body)=>request('/issues/'+n,'PATCH',{body}),close:n=>request('/issues/'+n,'PATCH',{state:'closed'})})
+ if(!input){
+  const prs=[...await request('/pulls?state=open&per_page=30'),...await request('/pulls?state=closed&sort=updated&direction=desc&per_page=30')]
+  for(const pr of prs){
+   const old=issues.find(x=>x.state==='open'&&x.title===`[装扮自动化] 合并等待 #${pr.number}`)
+   if(old&&(pr.state!=='open'||pr.draft)){await request('/issues/'+old.number,'PATCH',{state:'closed'});old.state='closed'}
+   const alert=pullRequestAlert(pr);if(!alert)continue
+   const existing=issues.find(x=>x.title===alert.title)
+   if(!existing){const issue=await request('/issues','POST',{...alert,assignees:['kourou25']});issues.push(issue)}else if(existing.state==='open'&&existing.body!==alert.body)await request('/issues/'+existing.number,'PATCH',{body:alert.body})
+  }
+ }
  console.log(`已检查 ${runs.length} 条 GitHub 检查记录`)
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await main()

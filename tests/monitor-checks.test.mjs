@@ -1,6 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {assessment,issueTitle,reconcile} from '../scripts/monitor-checks.mjs'
+import {assessment,issueTitle,reconcile,pullRequestAlert} from '../scripts/monitor-checks.mjs'
 const now=Date.parse('2026-10-29T08:00:00Z'),run=(extra={})=>({id:42,status:'in_progress',created_at:new Date(now-16*60000).toISOString(),...extra})
 test('等待中超过15分钟提示，正常运行和成功不报异常',()=>{assert.match(assessment(run(),now),/15分钟/);assert.equal(assessment(run({created_at:new Date(now-2*60000).toISOString()}),now),null);assert.equal(assessment(run({status:'completed',conclusion:'success'}),now),null);assert.match(assessment(run({status:'completed',conclusion:'failure'}),now),/未通过/)})
 test('异常只创建一次，同一条恢复成功后关闭',async()=>{const issues=[],log=[],ctx={issues,now,create:async(title,body)=>{log.push('create');issues.push({number:1,title,body})},update:async()=>log.push('update'),close:async()=>log.push('close')};await reconcile({...ctx,run:run()});await reconcile({...ctx,run:run()});assert.deepEqual(log,['create']);assert.equal(issues[0].title,issueTitle(42));await reconcile({...ctx,run:run({status:'completed',conclusion:'success'})});assert.deepEqual(log,['create','close'])})
+test('合并请求和已合并未上线均不会静默等待，草稿不提醒',()=>{const old=new Date(now-16*60000).toISOString(),recent=new Date(now-2*60000).toISOString();assert.match(pullRequestAlert({number:3,state:'open',updated_at:old},now).title,/合并等待/);assert.match(pullRequestAlert({number:3,state:'closed',merged_at:old},now).title,/上线等待/);assert.equal(pullRequestAlert({number:3,state:'open',draft:true,updated_at:old},now),null);assert.equal(pullRequestAlert({number:3,state:'open',updated_at:recent},now),null)})
