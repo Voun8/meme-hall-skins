@@ -35,13 +35,13 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            node --test .trusted-check/tests/validate-snapshot.test.mjs
+            node --test .trusted-check/tests/*.test.mjs
             node .trusted-check/scripts/validate-snapshot.mjs "$GITHUB_WORKSPACE" "$BASE_SHA" HEAD
           elif [ "$EVENT_NAME" = "push" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
-            node --test tests/validate-snapshot.test.mjs
+            node --test tests/*.test.mjs
             node scripts/validate-snapshot.mjs "$GITHUB_WORKSPACE" "$BASE_SHA" HEAD --trusted
           else
-            node --test tests/validate-snapshot.test.mjs
+            node --test tests/*.test.mjs
             echo '手动检查：基础测试完成。'
           fi
       - name: 显示当前接入状态

@@ -1,0 +1,36 @@
+name: 装扮检查异常提醒
+on:
+  workflow_run:
+    workflows: [装扮投稿检查]
+    types: [completed]
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  issues: write
+concurrency:
+  group: skins-automation-monitor
+  cancel-in-progress: false
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得可信主分支代码
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 检查失败或超时并记录到 GitHub
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          WATCH_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node scripts/monitor-checks.mjs
+      - name: 显示通知范围
+        if: always()
+        run: echo '异常会写入本仓库 Issue 并指派站长；网站站长通知尚未接通。' >> "$GITHUB_STEP_SUMMARY"
