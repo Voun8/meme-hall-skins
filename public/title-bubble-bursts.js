@@ -21,64 +21,65 @@ function nextFace(bubble){
  }
  return null
 }
-// The machine gun spits thick white liquid: heavy gobs that land on the next
-// avatar as one puddle, which then sags and slides slowly down over it.
+// The machine gun spits thick white liquid: gobs that land on the next avatar
+// as a few uneven puddles, then run down and leave quickly so nothing stays hidden.
 function lobGoo(doc,layer,{start,dx,dy,bend,target,face,stage},animations){
  const shots=stage>=7?3:stage>=4?2:1
  for(let i=0;i<shots;i++){
   const blob=doc.createElement('i');blob.className='rt-goo-blob';blob.style.left=start.x+'px';blob.style.top=start.y+'px';layer.append(blob)
-  const apex=-(Math.min(15,7+Math.abs(dy)*.22)+i*2)
+  const apex=-(Math.min(12,6+Math.abs(dy)*.18)+i*2)
   animations.push(blob.animate([
    {transform:'translate(0,0) scale(.4,.55)',opacity:0},
-   {transform:`translate(${bend*.55}px,${apex}px) scale(.8,1.08) rotate(-9deg)`,opacity:1,offset:.34},
-   {transform:`translate(${dx*.6}px,${dy*.6}px) scale(.92,1.03) rotate(4deg)`,opacity:1,offset:.68},
-   {transform:`translate(${dx}px,${dy}px) scale(1.15,.72)`,opacity:.96,offset:.93},
-   {transform:`translate(${dx}px,${dy+3}px) scale(.88,.42)`,opacity:0}
-  ],{duration:900,delay:i*250,easing:'cubic-bezier(.34,0,.72,1)',fill:'both'}))
+   {transform:`translate(${bend*.55}px,${apex}px) scale(.78,1.06) rotate(-9deg)`,opacity:1,offset:.34},
+   {transform:`translate(${dx*.6}px,${dy*.6}px) scale(.9,1.02) rotate(4deg)`,opacity:1,offset:.7},
+   {transform:`translate(${dx}px,${dy}px) scale(1.12,.74)`,opacity:.95,offset:.93},
+   {transform:`translate(${dx}px,${dy+3}px) scale(.86,.42)`,opacity:0}
+  ],{duration:760,delay:i*220,easing:'ease-in',fill:'both'}))
  }
  if(!target||!face)return
  const pool=doc.createElement('span');pool.className='rt-goo-pool';Object.assign(pool.style,{left:face.left+'px',top:face.top+'px',width:face.width+'px',height:face.height+'px'});layer.append(pool)
- const end=3600
+ const end=1780
+ // One short window for the whole splash, matching the old burst cadence.
  animations.push(pool.animate([
   {opacity:0},
   {opacity:1,offset:.03},
-  {opacity:1,offset:.96},
+  {opacity:1,offset:.93},
   {opacity:0}
- ],{duration:end-620,delay:620,fill:'both',easing:'linear'}))
- for(const [cls,w,h,l,t,rx,ry,delay] of [
-  ['rt-goo-patch',30,26,10,-2,8,22,620],
-  ['rt-goo-patch',38,30,48,-6,-6,20,680],
-  ['rt-goo-patch',26,24,24,18,4,24,760]
+ ],{duration:end-500,delay:500,fill:'both',easing:'linear'}))
+ for(const [w,h,l,t,rx,ry,delay] of [
+  [24,20,10,-2,6,10,500],
+  [30,24,46,-6,-5,12,540],
+  [20,18,24,16,3,14,580]
  ]){
-  const patch=doc.createElement('i');patch.className=cls
+  const patch=doc.createElement('i');patch.className='rt-goo-patch'
   Object.assign(patch.style,{width:w+'%',height:h+'%',left:l+'%',top:t+'%'})
   pool.append(patch)
   animations.push(patch.animate([
    {transform:'scale(.2)',opacity:0},
-   {transform:'scale(1.12,.86)',opacity:1,offset:.14},
+   {transform:'scale(1.1,.86)',opacity:1,offset:.14},
    {transform:'scale(1)',offset:.24},
-   {transform:`translate(${rx*.3}px,${ry*.4}px) scale(1.02,1.06)`,offset:.7},
-   {transform:`translate(${rx}px,${ry}px) scale(.98,1.14)`}
+   {transform:`translate(${rx*.3}px,${ry*.4}px) scale(1.02,1.05)`,offset:.7},
+   {transform:`translate(${rx}px,${ry}px) scale(.98,1.1)`}
   ],{duration:end-delay,delay,fill:'both',easing:'cubic-bezier(.28,.64,.38,1)'}))
  }
- // Small stray droplets around the patches.
- for(const [x,y,size,delay] of [[-6,14,10,720],[82,10,10,780],[12,50,9,880],[76,44,10,920]]){
+ // Small stray droplets, kept inside the avatar so they never cover nearby text.
+ for(const [x,y,size,delay] of [[2,12,8,560],[84,10,8,600],[10,52,7,640],[78,44,8,680]]){
   const bead=doc.createElement('i');bead.className='rt-goo-bead';Object.assign(bead.style,{left:x+'%',top:y+'%',width:size+'%'});pool.append(bead)
   animations.push(bead.animate([
    {transform:'scale(.15)',opacity:0},
    {transform:'scale(1.15)',opacity:1,offset:.1},
    {transform:'scale(1)',offset:.22},
-   {transform:'translateY(12px) scale(.92)'}
+   {transform:'translateY(8px) scale(.92)'}
   ],{duration:end-delay,delay,fill:'both',easing:'ease-out'}))
  }
- // Viscous white liquid running down slowly across the avatar.
- for(const [delay,left,width,height] of [[840,16,8,84],[960,34,10,108],[1100,56,9,96],[1240,68,7,80]]){
+ // Viscous white liquid running down over the avatar edge, all gone at the end.
+ for(const [delay,left,width,height] of [[620,18,8,62],[680,36,10,78],[740,54,9,70],[800,68,7,56]]){
   const drip=doc.createElement('i');drip.className='rt-goo-drip';Object.assign(drip.style,{left:left+'%',width:width+'%',height:height+'%'});pool.append(drip)
   animations.push(drip.animate([
    {transform:'scaleY(.02)',opacity:0},
-   {transform:'scaleY(.16)',opacity:1,offset:.06},
-   {transform:'scaleY(.68)',offset:.52},
-   {transform:'scaleY(1.04) translateY(16px)'}
+   {transform:'scaleY(.18)',opacity:1,offset:.08},
+   {transform:'scaleY(.7)',offset:.55},
+   {transform:'scaleY(1.02) translateY(8px)'}
   ],{duration:end-delay,delay,fill:'both',easing:'cubic-bezier(.34,.64,.42,1)'}))
  }
 }
